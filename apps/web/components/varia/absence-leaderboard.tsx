@@ -93,7 +93,7 @@ export function AbsenceLeaderboard({ rows }: { rows: AbsenceRow[] }) {
                       className="pointer-events-none absolute inset-y-1 right-0 rounded-sm"
                       style={{ width: `${pct}%`, backgroundColor: token.fill, opacity: 0.2 }}
                     />
-                    <span className="relative font-semibold text-foreground">{r.absentPct}%</span>
+                    <span className="relative font-semibold text-foreground">{r.absentPct.toFixed(1)}%</span>
                   </td>
                 </tr>
               );
@@ -124,7 +124,7 @@ export function AbsenceLeaderboard({ rows }: { rows: AbsenceRow[] }) {
                 {r.fullName}
               </Link>
               <PartyBadge shortName={r.partyShortName} />
-              <span className="ml-auto tabular-nums font-bold text-foreground">{r.absentPct}%</span>
+              <span className="ml-auto tabular-nums font-bold text-foreground">{r.absentPct.toFixed(1)}%</span>
             </span>
             <div className="mt-2 text-xs text-muted-foreground">
               {t("absentVotes")}: <span className="tabular-nums text-foreground">{r.absent}</span> ·{" "}

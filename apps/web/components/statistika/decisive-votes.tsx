@@ -73,21 +73,7 @@ export function DecisiveVotes({
 
   return (
     <div className="space-y-8">
-      {/* Lead: the closest calls, tightest first. */}
-      <div>
-        <p className="mb-3 max-w-2xl text-sm text-muted-foreground">{t("closeIntro")}</p>
-        {close.length === 0 ? (
-          <p className="text-sm text-muted-foreground">{t("closeEmpty")}</p>
-        ) : (
-          <ul className="space-y-3">
-            {close.map((v) => (
-              <VoteCard key={v.voteId} v={v} />
-            ))}
-          </ul>
-        )}
-      </div>
-
-      {/* Punchline: did any defection actually change a result? Usually none. */}
+      {/* Lead with the answer: did any defection actually change a result? Usually none. */}
       <div className="rounded-md border-2 border-foreground p-5">
         {decisive.length === 0 ? (
           <>
@@ -105,6 +91,21 @@ export function DecisiveVotes({
               ))}
             </ul>
           </>
+        )}
+      </div>
+
+      {/* Then the closest calls, tightest first. */}
+      <div>
+        <h2 className="font-serif text-xl font-bold tracking-tight">{t("closeHeading")}</h2>
+        <p className="mb-3 mt-1 max-w-2xl text-sm text-muted-foreground">{t("closeIntro")}</p>
+        {close.length === 0 ? (
+          <p className="text-sm text-muted-foreground">{t("closeEmpty")}</p>
+        ) : (
+          <ul className="space-y-3">
+            {close.map((v) => (
+              <VoteCard key={v.voteId} v={v} />
+            ))}
+          </ul>
         )}
       </div>
     </div>

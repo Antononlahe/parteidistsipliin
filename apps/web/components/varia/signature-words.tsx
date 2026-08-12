@@ -130,11 +130,8 @@ export function SignatureWords({ parties, memberWords }: { parties: PartyWords[]
             const token = partyToken(p.partyShortName);
             return (
               <div key={p.partyShortName} className="rounded-md border border-border p-4">
-                <div className="mb-3 flex items-center gap-2">
+                <div className="mb-3">
                   <PartyBadge shortName={p.partyShortName} />
-                  {isKnownParty(p.partyShortName) && (
-                    <span className="text-sm font-semibold text-muted-foreground">{token.label}</span>
-                  )}
                 </div>
                 <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                   {p.words.map((w) => {

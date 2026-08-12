@@ -125,7 +125,7 @@ export function MemberSearch({
             setOpen(false);
           }
         }}
-        className="h-7 w-28 rounded border border-border bg-background px-2 text-sm outline-none transition-[width] placeholder:text-muted-foreground focus:w-44 focus:border-foreground sm:w-36"
+        className="h-7 w-36 rounded border border-border bg-background px-2 text-sm outline-none transition-[width] placeholder:text-muted-foreground focus:w-52 focus:border-foreground sm:w-48 sm:focus:w-56"
       />
       {open && q.trim() && (
         <ul

@@ -98,7 +98,7 @@ export function SpeakerLeaderboard({ rows }: { rows: SpeakerRow[] }) {
               <th scope="col" className="border-r border-border px-3 py-2 text-right" aria-sort={sortKey === "tenure" ? (sortDir === "asc" ? "ascending" : "descending") : "none"}>
                 <button
                   onClick={() => choose("tenure")}
-                  className={`text-[11px] font-bold uppercase tracking-wide hover:text-foreground ${sortKey === "tenure" ? "text-foreground" : "text-muted-foreground"}`}
+                  className={`whitespace-nowrap text-[11px] font-bold uppercase tracking-wide hover:text-foreground ${sortKey === "tenure" ? "text-foreground" : "text-muted-foreground"}`}
                 >
                   {t("tenure")} {sortKey === "tenure" ? (sortDir === "asc" ? "↑" : "↓") : ""}
                 </button>

@@ -20,7 +20,10 @@ export function AffiliationsPanel({
       <dl className="space-y-1 text-muted-foreground">
         {birthYear && <Row k={t("born")} v={birthYear} />}
         {seniorityYears != null && <Row k={t("seniority")} v={t("years", { n: seniorityYears })} />}
-        {member.mandateStartedOn && <Row k={t("mandate")} v={member.mandateStartedOn.slice(0, 10)} />}
+        {/* "2023-04-07" -> "07.04.2023", matching the election card's date format */}
+        {member.mandateStartedOn && (
+          <Row k={t("mandate")} v={member.mandateStartedOn.slice(0, 10).split("-").reverse().join(".")} />
+        )}
         {member.email && <Row k={t("email")} v={member.email} />}
       </dl>
     </aside>

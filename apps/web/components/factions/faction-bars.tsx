@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 import { partyToken } from "@/lib/party";
 import {
   factionMetric,
@@ -29,13 +30,20 @@ export function FactionBars({
   rows: FactionComparisonRow[];
   sortKey: FactionSortKey;
 }) {
-  const max = Math.max(0, ...rows.map((r) => factionMetric(r, sortKey) ?? 0));
+  const t = useTranslations("factions");
+  const values = rows.map((r) => factionMetric(r, sortKey)).filter((v): v is number => v !== null);
+  const max = Math.max(0, ...values);
+  const min = Math.min(...values);
+  // Near-uniform rates (e.g. cohesion, all 97-100%) render as identical full bars; zoom the
+  // scale to a round floor below the minimum and say so, instead of showing no information.
+  const zoomed = sortKey !== "members" && max > 0 && min > 0 && (max - min) / max < 0.1;
+  const floor = zoomed ? Math.max(0, Math.floor(min * 20 - 0.5) / 20) : 0; // 5%-step below min
   return (
     <div className="mb-6 flex flex-col gap-1.5">
       {rows.map((r) => {
         const value = factionMetric(r, sortKey);
         const token = partyToken(r.partyShortName);
-        const width = max > 0 && value !== null ? (value / max) * 100 : 0;
+        const width = max > floor && value !== null ? ((value - floor) / (max - floor)) * 100 : 0;
         return (
           <motion.div key={r.partyId} layout transition={{ duration: 0.2 }} className="flex items-center gap-2">
             <span
@@ -59,6 +67,9 @@ export function FactionBars({
           </motion.div>
         );
       })}
+      {zoomed && (
+        <p className="text-xs text-muted-foreground">{t("zoomNote", { floor: Math.round(floor * 100) })}</p>
+      )}
     </div>
   );
 }

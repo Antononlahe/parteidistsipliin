@@ -127,7 +127,8 @@ export function Network({ friendship, causes }: { friendship: CaucusMember[]; ca
 
   return (
     <>
-      <Section title={t("friendshipH")} sub={t("friendshipSub")} count={countryRows.length}>
+      {/* First section open: with all three collapsed the page looked empty on arrival. */}
+      <Section open title={t("friendshipH")} sub={t("friendshipSub")} count={countryRows.length}>
         <Accordion
           max={Math.max(1, ...countryRows.map((r) => r.members.length))}
           rows={countryRows.map((r) => ({

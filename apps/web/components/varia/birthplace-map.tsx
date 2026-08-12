@@ -124,7 +124,7 @@ export function BirthplaceMap({ pins }: { pins: BirthPin[] }) {
             </motion.div>
           ) : (
             <motion.p key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-sm text-muted-foreground">
-              {t("birthplaceSub")}
+              {t("birthplaceHint")}
             </motion.p>
           )}
         </AnimatePresence>

@@ -22,7 +22,7 @@
     "expenses": "Kuluhüvitised",
     "decisive": "Otsustavad hääled",
     "varia": "Varia",
-    "searchPlaceholder": "Otsi saadikut või sõnavõttu…",
+    "searchPlaceholder": "Otsi saadikut, kõnet…",
     "searchNoResults": "Ei leidnud.",
     "searchGroupMembers": "Saadikud",
     "searchGroupSpeeches": "Sõnavõtud",
@@ -31,7 +31,7 @@
   "hub": {
     "rail": {
       "swipeHint": "Pühi teema sees küljele",
-      "shared": "jagatud",
+      "shared": "jagavad 1. kohta",
       "speechesInfo": "Riigikogu esimees ja aseesimehed on välja jäetud: istungi juhatajana peetud sõnavõtud ei kajastu nende arvestuses.",
       "loyalSub": "ei hääletanud kordagi vastu",
       "against": "Enim vastu",
@@ -105,12 +105,13 @@
     "seeAll": "Vaata kõiki"
   },
   "decisive": {
-    "heading": "Napimad hääletused",
-    "intro": "Napimad hääletused: kordi, mil fraktsiooni vastu antud hääli oli arvuliselt sama palju, kui tulemuse muutmiseks vaja — tulemus jäi samaks vaid seetõttu, et need hääled ei langenud ühte suunda. Iga hääletuse juures arvestame õiget vastuvõtmise lävendit: enamasti poolthäälteenamus, aga umbusaldusavaldused, ettepanekud Vabariigi Valitsusele, saadikupuutumatuse äravõtmine ja põhiseaduse §-s 104 loetletud seadused nõuavad koosseisu häälteenamust (51 häält).",
+    "heading": "Otsustavad hääled",
+    "intro": "Kas fraktsiooni vastu antud hääled on mõne hääletuse tulemust muutnud? Iga hääletuse juures arvestame õiget vastuvõtmise lävendit: enamasti poolthäälteenamus, aga umbusaldusavaldused, ettepanekud Vabariigi Valitsusele, saadikupuutumatuse äravõtmine ja põhiseaduse §-s 104 loetletud seadused nõuavad koosseisu häälteenamust (51 häält).",
     "emptyHeadline": "0 hääletust",
     "emptyBody": "Selles koosseisus ei ole fraktsiooni vastu antud hääled muutnud ühegi hääletuse tulemust. Fraktsioonivastaseid hääli anti {defectionVotes} hääletusel, kuid tulemus oleks olnud sama ka siis, kui kõik oleksid hääletanud koos oma fraktsiooniga.",
     "flippedHeadline": "{n} hääletust, kus fraktsioonivastane hääl muutis tulemust",
     "showClose": "Näita ka napilt mööda läinud hääletusi",
+    "closeHeading": "Napimad hääletused",
     "closeIntro": "Hääletused, kus fraktsioonivastaseid hääli oli vähemalt sama palju, kui tulemuse muutmiseks vaja — tulemus jäi samaks vaid seetõttu, et need hääled ei langenud ühte suunda.",
     "closeEmpty": "Selliseid hääletusi ei ole.",
     "ruleSimple": "poolthäälteenamus",
@@ -193,8 +194,8 @@
     "yearsOld": "{n}-aastane",
     "margusonadTitle": "Märksõnad",
     "margusonadIntro": "Iga fraktsiooni kõige iseloomulikumad sõnad täiskogu kõnedes (TF-IDF lemmatiseeritud stenogrammide põhjal). Vajuta sõnale ja all kuvatakse kõnelõigud, kus seda kasutati.",
-    "partyWordsH": "Erakondade märksõnad",
-    "anchorParties": "Erakonnad",
+    "partyWordsH": "Fraktsioonide märksõnad",
+    "anchorParties": "Fraktsioonid",
     "anchorMembers": "Saadikud",
     "memberWordsH": "Saadikute märksõnad",
     "memberWordsSub": "Iga saadiku kolm kõige iseloomulikumat sõna täiskogu kõnedes, eristuvaimad eespool. Vajuta sõnale, et näha tema kõnesid selle sõnaga.",
@@ -238,6 +239,7 @@
     "childrenAvg": "Keskmine peres",
     "birthplaceH": "Sünnikohad",
     "birthplaceSub": "Kus Riigikogu liikmed on sündinud (küla kaardistatud maakonnakeskusesse).",
+    "birthplaceHint": "Klõpsa kaardil mullile, et näha sealt pärit liikmeid.",
     "vorgustikTitle": "Parlamendirühmad",
     "vorgustikIntro": "Riigikogu liikmete parlamendirühmad (sõprusrühmad teiste riikidega) ja toetusrühmad (teemapõhised ühendused üle fraktsioonide).",
     "friendshipH": "Parlamendirühmad riikide kaupa",
@@ -283,7 +285,7 @@
     "sortBy": "Järjesta",
     "showing": "{count} liiget",
     "former": "endine",
-    "mandate": "Mandaat",
+    "mandate": "Hääli valimistel",
     "sort": {
       "discipline": "Distsipliin",
       "name": "Nimi",
@@ -326,7 +328,8 @@
     "former": "endine",
     "totals": "{counted} arvestatud häält · {defections} vastuhäält · kohalolek {attendance}",
     "expenses": "Kuluhüvitised",
-    "barsHeading": "Fraktsiooniti"
+    "barsHeading": "Fraktsiooniti",
+    "zoomNote": "Erinevused on väikesed — skaala algab {floor}%."
   },
   "memberDetail": {
     "compare": {

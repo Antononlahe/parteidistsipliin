@@ -118,8 +118,10 @@ function CardView({ card, seeAll }: { card: RailCard; seeAll: string }) {
   );
 }
 
+// Always visible on desktop (not hover-only): the clipped card is the only other cue that the
+// rail scrolls, and mouse users can't swipe.
 const ARROW =
-  "absolute top-[calc(50%-6px)] z-10 hidden h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-card text-foreground shadow-md md:group-hover:flex";
+  "absolute top-[calc(50%-6px)] z-10 hidden h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-card text-foreground shadow-md md:flex";
 
 function Rail({ rail }: { rail: HubRail }) {
   const ref = useRef<HTMLDivElement>(null);

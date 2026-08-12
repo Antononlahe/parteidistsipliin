@@ -22,7 +22,7 @@
     "expenses": "Expenses",
     "decisive": "Decisive votes",
     "varia": "Varia",
-    "searchPlaceholder": "Find an MP or a speech…",
+    "searchPlaceholder": "Find an MP, a speech…",
     "searchNoResults": "No matches.",
     "searchGroupMembers": "Members",
     "searchGroupSpeeches": "Speeches",
@@ -31,7 +31,7 @@
   "hub": {
     "rail": {
       "swipeHint": "Swipe sideways within a theme",
-      "shared": "tied",
+      "shared": "tied for 1st",
       "speechesInfo": "The Speaker and Deputy Speakers are excluded: remarks made while chairing a sitting aren't counted.",
       "loyalSub": "never voted against the line",
       "against": "Most against",
@@ -105,12 +105,13 @@
     "seeAll": "See all"
   },
   "decisive": {
-    "heading": "Closest votes",
-    "intro": "The closest calls: times when votes cast against the faction line were numerically enough to change the outcome — the result held only because those votes did not fall the same way. Each vote is checked against its correct passage threshold: usually a simple majority of votes cast, but no-confidence motions, proposals to the Government, immunity waivers and the laws listed in §104 of the Constitution require a majority of the full membership (51 votes).",
+    "heading": "Decisive votes",
+    "intro": "Have votes cast against the faction line ever changed an outcome? Each vote is checked against its correct passage threshold: usually a simple majority of votes cast, but no-confidence motions, proposals to the Government, immunity waivers and the laws listed in §104 of the Constitution require a majority of the full membership (51 votes).",
     "emptyHeadline": "0 votes",
     "emptyBody": "In this Riigikogu, votes cast against the faction line have not changed the outcome of a single vote. Defections occurred in {defectionVotes} votes, but every outcome would have been the same had everyone followed their faction line.",
     "flippedHeadline": "{n} votes where a defection changed the outcome",
     "showClose": "Also show near misses",
+    "closeHeading": "Near misses",
     "closeIntro": "Votes where the defectors were numerous enough to flip the result — the outcome held only because those votes did not fall in one direction.",
     "closeEmpty": "No such votes.",
     "ruleSimple": "simple majority",
@@ -193,8 +194,8 @@
     "yearsOld": "{n} years old",
     "margusonadTitle": "Signature words",
     "margusonadIntro": "Each faction's most distinctive words in plenary speeches (TF-IDF over lemmatised stenograms). Click a word to see the speech excerpts where it was used.",
-    "partyWordsH": "Parties' signature words",
-    "anchorParties": "Parties",
+    "partyWordsH": "Factions' signature words",
+    "anchorParties": "Factions",
     "anchorMembers": "Members",
     "memberWordsH": "Members' signature words",
     "memberWordsSub": "Each member's three most distinctive words in plenary speeches, most distinctive first. Click a word to see their speeches using it.",
@@ -238,6 +239,7 @@
     "childrenAvg": "Average per family",
     "birthplaceH": "Birthplaces",
     "birthplaceSub": "Where Riigikogu members were born (villages mapped to their county seat).",
+    "birthplaceHint": "Click a bubble on the map to see the members born there.",
     "vorgustikTitle": "Friendship groups",
     "vorgustikIntro": "Members' parliamentary friendship groups (with other countries) and cause caucuses (cross-faction thematic groups).",
     "friendshipH": "Friendship groups by country",
@@ -283,7 +285,7 @@
     "sortBy": "Sort by",
     "showing": "{count} members",
     "former": "former",
-    "mandate": "Mandate",
+    "mandate": "Votes at election",
     "sort": {
       "discipline": "Discipline",
       "name": "Name",
@@ -326,7 +328,8 @@
     "former": "former",
     "totals": "{counted} counted votes · {defections} defections · attendance {attendance}",
     "expenses": "Expenses",
-    "barsHeading": "By faction"
+    "barsHeading": "By faction",
+    "zoomNote": "Differences are small — the scale starts at {floor}%."
   },
   "memberDetail": {
     "compare": {
