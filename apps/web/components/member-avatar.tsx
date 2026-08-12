@@ -24,6 +24,10 @@ export function MemberAvatar({
         alt={fullName}
         width={30}
         height={30}
+        // Thumbs are pre-generated ~2KB webp files; routing them through /_next/image adds
+        // nothing and the optimizer on the VPS has been observed to hang permanently on some
+        // (file, width, format) combos under a cold-cache burst, leaving blank avatars.
+        unoptimized
         className="h-[30px] w-[30px] flex-none rounded-full object-cover"
       />
     );
