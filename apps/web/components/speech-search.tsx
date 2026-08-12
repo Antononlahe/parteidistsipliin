@@ -50,6 +50,7 @@ const PAGE_SIZE = 20;
 export function SpeechSearch({ memberId }: { memberId?: number }) {
   const t = useTranslations("memberDetail");
   const [q, setQ] = useState("");
+  const [exact, setExact] = useState(false);
   const [hits, setHits] = useState<SpeechHit[] | null>(null);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -69,8 +70,9 @@ export function SpeechSearch({ memberId }: { memberId?: number }) {
     setLoading(true);
     try {
       const member = memberId ? `memberId=${memberId}&` : "";
+      const ex = exact ? "exact=1&" : "";
       const res = await fetch(
-        `/api/speeches?${member}q=${encodeURIComponent(term)}&offset=${(p - 1) * PAGE_SIZE}`,
+        `/api/speeches?${member}${ex}q=${encodeURIComponent(term)}&offset=${(p - 1) * PAGE_SIZE}`,
       );
       const data = (await res.json()) as { hits: SpeechHit[]; total: number };
       if (id !== reqId.current) return;
@@ -102,7 +104,7 @@ export function SpeechSearch({ memberId }: { memberId?: number }) {
     const timer = setTimeout(() => fetchPage(term, 1), 300);
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [q, memberId]);
+  }, [q, memberId, exact]);
 
   return (
     <div className="mt-3 min-w-0">
@@ -126,7 +128,20 @@ export function SpeechSearch({ memberId }: { memberId?: number }) {
           </button>
         )}
       </div>
-      <p className="mt-1 text-xs text-muted-foreground">{t("searchHint")}</p>
+      <div className="mt-1 flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+        <p className="text-xs text-muted-foreground">
+          {exact ? t("searchExactHint") : t("searchHint")}
+        </p>
+        <label className="flex shrink-0 cursor-pointer items-center gap-1.5 text-xs text-muted-foreground">
+          <input
+            type="checkbox"
+            checked={exact}
+            onChange={(e) => setExact(e.target.checked)}
+            className="h-3.5 w-3.5 accent-foreground"
+          />
+          {t("searchExact")}
+        </label>
+      </div>
 
       {q.trim().length >= 2 && (
         <div className="mt-3">

@@ -369,6 +369,8 @@
     "searchSpeeches": "Search this member's speeches…",
     "searchSpeechesAll": "Search all speeches…",
     "searchHint": "Search is Estonian inflection-aware (e.g. \"kool\" also finds \"koolis\", \"koolide\").",
+    "searchExact": "Exact match",
+    "searchExactHint": "Only the exact form you typed is matched.",
     "searchLoading": "Searching…",
     "searchNoResults": "No speeches found for this search.",
     "searchTotal": "{n, plural, one {1 speech found} other {# speeches found}} · newest first",

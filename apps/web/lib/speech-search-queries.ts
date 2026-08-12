@@ -4,8 +4,11 @@ import { HL_START, HL_END, prefixHighlightQuery, type SpeechHit } from "./speech
 // Match strategy: the `search` tsvector indexes Vabamorf base-form LEMMAS, so a base-form
 // query ("kool") matches every inflection in the corpus. The web app can't lemmatise the
 // query itself (no Estonian lemmatiser in Node), so an inflected query ("koolis") won't hit
-// the lemma index — `pg_trgm` ILIKE over the raw text is the fallback that still finds it
-// (trigram-indexed since migration 0026, so the corpus-wide scan is indexable).
+// the lemma index — a `pg_trgm` word-start regex (`~* '\mkoolis'`) over the raw text is the
+// fallback that still finds it (trigram GIN since migration 0026 supports regex, so the
+// corpus-wide scan is indexable). Word-start, not substring: ILIKE '%ema%' used to match
+// mid-word ("teema", "probleemat"), flooding results with hits ts_headline can't highlight.
+// `exact` mode drops the lemma index and requires the typed phrase as whole words (`\m…\M`).
 // Highlighting uses ts_headline with non-HTML sentinel markers; the client wraps them in
 // <mark> as React text nodes (XSS-safe). ts_headline only highlights exact forms in the raw
 // text; lemma-only matches fall back to the opening fragment, which is acceptable.
@@ -20,16 +23,18 @@ export type SpeechSearchResult = { hits: SpeechHit[]; total: number };
  *  would dominate the query). */
 export async function searchSpeeches(
   q: string,
-  opts: { memberId?: number; party?: string; limit?: number; offset?: number } = {},
+  opts: { memberId?: number; party?: string; limit?: number; offset?: number; exact?: boolean } = {},
 ): Promise<SpeechSearchResult> {
   const query = q.trim();
   if (query.length < 2) return { hits: [], total: 0 };
-  const like = `%${query.replace(/[%_\\]/g, "\\$&")}%`;
+  const exact = opts.exact ?? false;
+  const rx = `\\m${query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}${exact ? "\\M" : ""}`;
   const headlineOpts =
     `StartSel=${HL_START}, StopSel=${HL_END}, ` +
     "MaxFragments=2, FragmentDelimiter= … , MinWords=5, MaxWords=20, ShortWord=2";
-  // Prefix query so inflections/compounds highlight; empty falls back to plain lexeme highlight.
-  const hq = prefixHighlightQuery(query);
+  // Prefix query so inflections/compounds highlight; empty falls back to plain lexeme
+  // highlight — which is exactly what exact mode wants.
+  const hq = exact ? "" : prefixHighlightQuery(query);
   const { rows } = await pool.query(
     `
     WITH ql AS (SELECT websearch_to_tsquery('simple', $1) AS q),
@@ -44,7 +49,7 @@ export async function searchSpeeches(
       LEFT JOIN member_current_party mcp ON mcp.member_id = ms.member_id
       WHERE ($6::int IS NULL OR ms.member_id = $6)
         AND ($7::text IS NULL OR mcp.party_short_name = $7)
-        AND (ms.search @@ ql.q OR ms.text ILIKE $2)
+        AND ((NOT $9 AND ms.search @@ ql.q) OR ms.text ~* $2)
       ORDER BY ms.spoken_at DESC NULLS LAST, ms.speech_key
       LIMIT $3 OFFSET $8
     )
@@ -65,13 +70,14 @@ export async function searchSpeeches(
     `,
     [
       query,
-      like,
+      rx,
       opts.limit ?? 20,
       headlineOpts,
       hq,
       opts.memberId ?? null,
       opts.party ?? null,
       Math.max(opts.offset ?? 0, 0),
+      exact,
     ],
   );
   const total = (rows[0]?.total as number | undefined) ?? 0;

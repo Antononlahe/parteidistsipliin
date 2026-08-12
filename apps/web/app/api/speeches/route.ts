@@ -21,6 +21,7 @@ export async function GET(request: Request) {
         party: searchParams.get("party") || undefined,
         limit: Number.isInteger(limitRaw) && limitRaw > 0 && limitRaw <= 50 ? limitRaw : undefined,
         offset: Number(searchParams.get("offset") ?? 0) || 0,
+        exact: searchParams.get("exact") === "1",
       });
       return NextResponse.json({ hits, total });
     }
