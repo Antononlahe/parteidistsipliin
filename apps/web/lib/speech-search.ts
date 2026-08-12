@@ -31,6 +31,15 @@ function neStem(t: string): string | null {
   return t.length >= 6 && t.endsWith("ne") ? t.slice(0, -2) : null;
 }
 
+// Verb lemmas end in -ma ("võitma", "kärpima") but the spoken forms drop it ("võitis", "kärbib"),
+// so the lemma is never a prefix of its own forms — signature words (Vabamorf lemmas) hit this
+// constantly. Emit the -ma stem as an extra prefix; its gradation grade is added by the caller
+// (kärpi -> kärbi). Same length guard rationale as neStem. A noun that happens to end in -ma can
+// only over-highlight inside speeches that already matched, which is harmless.
+function maStem(t: string): string | null {
+  return t.length >= 6 && t.endsWith("ma") ? t.slice(0, -2) : null;
+}
+
 // Build a prefix tsquery ("kool:* | õpe:*") for ts_headline so it highlights Estonian
 // inflections/compounds (koolis, kooli, koolitus), not just the exact base form. The corpus
 // `search` vector is lemma-indexed so it MATCHES those forms, but a plain headline query would
@@ -41,8 +50,9 @@ export function prefixHighlightQuery(q: string): string {
   const seen = new Set<string>();
   const out: string[] = [];
   for (const t of terms) {
-    // Order: exact lemma, then consonant-gradation grade, then the -ne stem.
-    for (const v of [t, t.length >= 4 ? gradeVariant(t) : null, neStem(t)]) {
+    const ma = maStem(t);
+    // Order: exact lemma, its gradation grade, the -ne stem, then the -ma verb stem + its grade.
+    for (const v of [t, t.length >= 4 ? gradeVariant(t) : null, neStem(t), ma, ma ? gradeVariant(ma) : null]) {
       if (v && !seen.has(v)) {
         seen.add(v);
         out.push(`${v}:*`);

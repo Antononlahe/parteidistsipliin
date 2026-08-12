@@ -59,6 +59,17 @@ describe("prefixHighlightQuery", () => {
     expect(prefixHighlightQuery("naine")).toBe("naine:*"); // stem "nai" too broad -> skipped
   });
 
+  it("adds the -ma verb stem (and its grade) so conjugations highlight", () => {
+    expect(prefixHighlightQuery("võitma")).toBe("võitma:* | võit:* | võid:*"); // võitis, võidab
+    expect(prefixHighlightQuery("kärpima")).toBe("kärpima:* | kärpi:* | kärb:*"); // kärbib
+    expect(prefixHighlightQuery("kohtuma")).toBe("kohtuma:* | kohtu:*"); // ht cluster: no grade
+  });
+
+  it("does not strip -ma when the stem would be too short (< 4)", () => {
+    expect(prefixHighlightQuery("saama")).toBe("saama:*"); // 5 chars -> skipped
+    expect(prefixHighlightQuery("andma")).toBe("andma:*"); // 5 chars -> skipped
+  });
+
   it("returns empty string when nothing usable", () => {
     expect(prefixHighlightQuery("!!")).toBe("");
     expect(prefixHighlightQuery("")).toBe("");
