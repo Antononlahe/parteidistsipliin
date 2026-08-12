@@ -21,6 +21,7 @@ import {
   type BillOutcome,
 } from "@/lib/member-detail";
 import { PARTY_ORDER } from "@/lib/party";
+import { scrollIntoViewSmooth } from "@/lib/scroll";
 import { PartyBadge } from "@/components/party-badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -51,6 +52,7 @@ function Timeline({
   activeKeys,
   hovered,
   setHovered,
+  onSelect,
 }: {
   width: number;
   contextMs: number[]; // non-defection vote timestamps, ascending (faint context ticks)
@@ -58,10 +60,15 @@ function Timeline({
   activeKeys: Set<string>;
   hovered: string | null;
   setHovered: (k: string | null) => void;
+  onSelect: (k: string) => void; // click on a red pin -> open + scroll to its summary row
 }) {
   const t = useTranslations("memberDetail");
   const svgRef = useRef<SVGSVGElement | null>(null);
   const [zoom, setZoom] = useState<[number, number] | null>(null);
+  // Hovered context tick: the page only ships dates for non-defection votes (titles for ~1600
+  // votes would balloon the HTML), and ticks are decimated to one per pixel column, so the
+  // tooltip can only say "date - N votes", not name them.
+  const [tickHover, setTickHover] = useState<{ px: number; ms: number; count: number } | null>(null);
 
   const defMs = defs.map((v) => new Date(v.votedAt).getTime());
   const total = contextMs.length + defs.length;
@@ -126,18 +133,23 @@ function Timeline({
 
   // Faint context ticks: every non-defection vote plus non-highlighted defections, decimated to
   // one tick per pixel column -- thousands of overplotted 1px lines convey nothing more than one,
-  // and undecimated they ballooned the SSR HTML (~4k SVG nodes per page).
-  const seenPx = new Set<number>();
-  const ticks = [
+  // and undecimated they ballooned the SSR HTML (~4k SVG nodes per page). The per-column count
+  // feeds the hover tooltip ("date - N votes").
+  const tickCols = new Map<number, { ms: number; count: number }>();
+  for (const ms of [
     ...contextMs,
     ...defs.filter((v) => !activeKeys.has(keyOf(v))).map((v) => new Date(v.votedAt).getTime()),
-  ].filter((ms) => {
-    if (!inDom(ms)) return false;
+  ]) {
+    if (!inDom(ms)) continue;
     const px = Math.round(x(new Date(ms)));
-    if (seenPx.has(px)) return false;
-    seenPx.add(px);
-    return true;
-  });
+    const col = tickCols.get(px);
+    if (col) col.count++;
+    else tickCols.set(px, { ms, count: 1 });
+  }
+  const ticks = [...tickCols.entries()];
+
+  const hoveredDef = hovered ? active.find((v) => keyOf(v) === hovered) : undefined;
+  const tipLeft = (px: number) => Math.min(Math.max(px, 90), Math.max(90, width - 90));
 
   return (
     <div className="relative">
@@ -151,62 +163,59 @@ function Timeline({
         </button>
       )}
       <svg ref={svgRef} width={width} height={TIMELINE_HEIGHT} role="img" aria-label={t("timelineAria", { n: total })}>
-      {/* every non-highlighted vote in view: faint context tick (cadence, not interactive) */}
+      {/* every non-highlighted vote in view: faint context tick with a date/count tooltip */}
       <Group>
-        {ticks.map((ms, i) => (
-          <line
+        {ticks.map(([px, col], i) => (
+          <g
             key={i}
-            x1={x(new Date(ms))}
-            x2={x(new Date(ms))}
-            y1={BASE_Y - 6}
-            y2={BASE_Y + 6}
-            stroke="var(--muted-foreground)"
-            strokeWidth={1}
-            opacity={0.2}
-          />
+            onMouseEnter={() => setTickHover({ px, ...col })}
+            onMouseLeave={() => setTickHover(null)}
+          >
+            <line
+              x1={px}
+              x2={px}
+              y1={BASE_Y - 6}
+              y2={BASE_Y + 6}
+              stroke="var(--muted-foreground)"
+              strokeWidth={1}
+              opacity={tickHover?.px === px ? 0.6 : 0.2}
+            />
+            {/* widened transparent hit target */}
+            <rect x={px - 2} y={BASE_Y - 8} width={4} height={16} fill="transparent" />
+          </g>
         ))}
       </Group>
 
-      {/* highlighted defections: big red clickable lollipops */}
+      {/* highlighted defections: big red lollipops; click opens the summary row below (the
+          riigikogu.ee link lives on that row, not here) */}
       <Group>
         {active.map((v, i) => {
           const px = x(new Date(v.votedAt));
           const k = keyOf(v);
           const on = hovered === k;
-          const url = eelnouUrl(v.draftUuid);
-          const handlers = {
-            onMouseEnter: () => setHovered(k),
-            onMouseLeave: () => setHovered(null),
-            onFocus: () => setHovered(k),
-            onBlur: () => setHovered(null),
-          };
-          const glyph = (
-            <g style={{ cursor: url ? "pointer" : "default" }}>
+          return (
+            <g
+              key={i}
+              role="button"
+              tabIndex={0}
+              aria-label={`${v.draftTitle ?? v.title} — ${t("seeSummary")}`}
+              style={{ cursor: "pointer" }}
+              onClick={() => onSelect(k)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  onSelect(k);
+                }
+              }}
+              onMouseEnter={() => setHovered(k)}
+              onMouseLeave={() => setHovered(null)}
+              onFocus={() => setHovered(k)}
+              onBlur={() => setHovered(null)}
+            >
               <line x1={px} x2={px} y1={BASE_Y} y2={DOT_Y} stroke={RED} strokeWidth={1.5} opacity={0.6} />
               <circle cx={px} cy={DOT_Y} r={on ? 6 : 4} fill={RED} />
               {/* generous transparent hit target */}
               <circle cx={px} cy={DOT_Y} r={12} fill="transparent" />
-              {on && (
-                <text x={px} y={11} textAnchor="middle" fontSize={10} fill="var(--foreground)">
-                  {v.votedAt.slice(0, 10)}
-                </text>
-              )}
-            </g>
-          );
-          return url ? (
-            <a
-              key={i}
-              href={url}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={`${v.draftTitle ?? v.title} — ${t("openInRiigikogu")}`}
-              {...handlers}
-            >
-              {glyph}
-            </a>
-          ) : (
-            <g key={i} {...handlers}>
-              {glyph}
             </g>
           );
         })}
@@ -221,6 +230,34 @@ function Timeline({
         tickLabelProps={{ fill: "var(--muted-foreground)", fontSize: 10, textAnchor: "middle" }}
       />
       </svg>
+
+      {/* HTML tooltip (SVG text can't wrap): hovered pin shows date + bill title, hovered
+          context tick shows date + how many votes share that pixel column. Positioned inside
+          the chart box: ParentSize's measuring div clips anything above it. */}
+      {(hoveredDef || tickHover) && (
+        <div
+          className="pointer-events-none absolute top-0 z-10 w-max max-w-[16rem] -translate-x-1/2 rounded-md border border-border bg-popover px-2 py-1 text-xs text-popover-foreground shadow-md"
+          style={{
+            left: tipLeft(hoveredDef ? x(new Date(hoveredDef.votedAt)) : tickHover!.px),
+          }}
+        >
+          {hoveredDef ? (
+            <>
+              <span className="tabular-nums text-muted-foreground">
+                {hoveredDef.votedAt.slice(0, 10)}
+              </span>{" "}
+              <span className="font-medium">{hoveredDef.draftTitle ?? hoveredDef.title}</span>
+            </>
+          ) : (
+            <>
+              <span className="tabular-nums text-muted-foreground">
+                {new Date(tickHover!.ms).toISOString().slice(0, 10)}
+              </span>{" "}
+              {t("tickTip", { n: tickHover!.count })}
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -319,8 +356,8 @@ function ResultPanel({
  * Member voting block: a compact defection-first timeline (all votes as faint context, votes
  * against the faction line as large red clickable markers) over the primary "votes against"
  * list. The list has two filters (abstained vs voted-differently; vote type), and the timeline
- * reflects the current filter. Hovering a marker highlights its list row and vice-versa; both
- * link to the bill's eelnõu page on riigikogu.ee.
+ * reflects the current filter. Hovering a marker highlights its list row and vice-versa; clicking
+ * a marker opens + scrolls to the row's summary. Only the row title links to riigikogu.ee.
  */
 export function MemberVotes({
   votes,
@@ -352,6 +389,26 @@ export function MemberVotes({
   const [expanded, setExpanded] = useState(false);
   const COLLAPSE_OVER = 10;
   const COLLAPSED_COUNT = 3;
+
+  // Timeline pin click -> expand the list, open that vote's tally and scroll its row into view.
+  // The scroll waits for the row to exist (expansion renders it on the next pass).
+  const rowRefs = useRef(new Map<string, HTMLLIElement>());
+  const [pendingScroll, setPendingScroll] = useState<string | null>(null);
+  const selectVote = (k: string) => {
+    setExpanded(true);
+    setOpen((prev) => new Set(prev).add(k));
+    setHovered(k);
+    setPendingScroll(k);
+  };
+  useEffect(() => {
+    if (!pendingScroll) return;
+    const el = rowRefs.current.get(pendingScroll);
+    if (!el) return;
+    // No rAF cleanup: clearing pendingScroll re-runs this effect immediately, and a cleanup
+    // would cancel the scroll it just scheduled.
+    scrollIntoViewSmooth(el, "center");
+    setPendingScroll(null);
+  }, [pendingScroll]);
 
   const filtered = useMemo(
     () =>
@@ -385,6 +442,7 @@ export function MemberVotes({
                 activeKeys={activeKeys}
                 hovered={hovered}
                 setHovered={setHovered}
+                onSelect={selectVote}
               />
             )}
           </ParentSize>
@@ -498,7 +556,15 @@ export function MemberVotes({
                   const result = voteResults[v.voteId];
                   const isOpen = open.has(k);
                   return (
-                    <li key={i} className={`px-3 py-2.5 text-sm ${on ? "bg-secondary" : "hover:bg-secondary"}`} {...handlers}>
+                    <li
+                      key={i}
+                      ref={(el) => {
+                        if (el) rowRefs.current.set(k, el);
+                        else rowRefs.current.delete(k);
+                      }}
+                      className={`scroll-mt-20 px-3 py-2.5 text-sm ${on ? "bg-secondary" : "hover:bg-secondary"}`}
+                      {...handlers}
+                    >
                       <div className="flex items-start justify-between gap-3">
                         {url ? (
                           <a
