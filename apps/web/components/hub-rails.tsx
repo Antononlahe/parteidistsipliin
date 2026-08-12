@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { ChevronLeft, ChevronRight, Info } from "lucide-react";
 import { Link } from "@/i18n/routing";
@@ -134,6 +134,14 @@ function Rail({ rail }: { rail: HubRail }) {
     setAtStart(el.scrollLeft <= 2);
     setAtEnd(el.scrollLeft >= el.scrollWidth - el.clientWidth - 2);
   }, []);
+
+  // Initial + resize measurement: a rail whose cards all fit is atEnd from the start,
+  // so it never shows arrows (onScroll alone only fires once the user scrolls).
+  useEffect(() => {
+    onScroll();
+    window.addEventListener("resize", onScroll);
+    return () => window.removeEventListener("resize", onScroll);
+  }, [onScroll]);
 
   const page = (dir: number) => {
     const el = ref.current;
