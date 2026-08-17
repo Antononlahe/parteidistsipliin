@@ -13,8 +13,32 @@ export type AbsenceRow = {
   absentPct: number; // 100 * absent / total, 1 decimal
 };
 
-// children is null when the member's profile states no number (shown as 0, listed last).
+// children is null when no number is known (shown as an em dash, listed last).
 export type ChildRow = { fullName: string; slug: string; partyShortName: string | null; photoThumbPath: string | null; children: number | null };
+
+// Official profile line blank or stale. Keep in sync with
+// apps/scraper/cache/profiles/children_overrides.json (keyed there by riigikogu uuid).
+export const CHILDREN_OVERRIDES: Record<string, number> = {
+  "riina-sikkut": 3,
+  "mart-vorklaev": 3,
+  "raimond-kaljulaid": 2,
+  "lauri-laanemets": 1,
+  "tonis-molder": 1,
+  "signe-kivi": 3,
+};
+
+/** Overlay known corrections and keep the list most-children-first, unknowns last. */
+export function applyChildrenOverrides(rows: ChildRow[]): ChildRow[] {
+  const out = rows.map((r) =>
+    r.slug in CHILDREN_OVERRIDES ? { ...r, children: CHILDREN_OVERRIDES[r.slug] } : r,
+  );
+  return out.sort((a, b) => {
+    if (a.children == null && b.children == null) return a.fullName.localeCompare(b.fullName, "et");
+    if (a.children == null) return 1;
+    if (b.children == null) return -1;
+    return b.children - a.children || a.fullName.localeCompare(b.fullName, "et");
+  });
+}
 
 /** Flat (category, member) row for the expandable people sections (hobbies / professions /
  *  universities). `detail` carries an optional per-member note (the profession, for the

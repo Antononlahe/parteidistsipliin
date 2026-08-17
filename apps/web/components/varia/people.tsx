@@ -284,8 +284,7 @@ export function Children({ rows }: { rows: ChildRow[] }) {
   // Filtering/expanding reflows the list; re-anchor these controls to the top so it never lands
   // the viewport mid-list ("cut midway").
   const filterRef = useRef<HTMLDivElement>(null);
-  // Headline stats are over members who state a number; members with none (children === null) are
-  // shown in the list as 0 but excluded here so the average isn't diluted by unstated profiles.
+  // Headline stats are over members with a known number; unknown (null) stay out of the average.
   const withData = rows.filter((c) => c.children != null);
   const total = withData.reduce((s, c) => s + (c.children ?? 0), 0);
   const avg = withData.length ? (total / withData.length).toFixed(1) : "0";
@@ -387,12 +386,13 @@ export function Children({ rows }: { rows: ChildRow[] }) {
               </Link>
               <PartyBadge shortName={c.partyShortName} />
             </span>
-            <span className="flex gap-0.5" aria-label={`${c.children ?? 0}`}>
-              {Array.from({ length: c.children ?? 0 }).map((_, i) => (
-                <span key={i} className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: partyToken(c.partyShortName).fill }} />
-              ))}
+            <span className="flex gap-0.5" aria-label={c.children == null ? t("childrenUnknown") : String(c.children)}>
+              {c.children != null &&
+                Array.from({ length: c.children }).map((_, i) => (
+                  <span key={i} className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: partyToken(c.partyShortName).fill }} />
+                ))}
             </span>
-            <span className="text-sm tabular-nums text-muted-foreground">{c.children ?? 0}</span>
+            <span className="text-sm tabular-nums text-muted-foreground">{c.children ?? "—"}</span>
           </li>
         ))}
       </ul>

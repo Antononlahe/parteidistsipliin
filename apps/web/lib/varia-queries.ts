@@ -1,8 +1,9 @@
 import { unstable_cache } from "next/cache";
 import { pool } from "./db";
-import type {
-  AbsenceRow, GenRow, PartyWords, MemberWord,
-  PeopleRow, PeopleMember, ChildRow, BirthPin, CaucusMember,
+import {
+  applyChildrenOverrides,
+  type AbsenceRow, type GenRow, type PartyWords, type MemberWord,
+  type PeopleRow, type PeopleMember, type ChildRow, type BirthPin, type CaucusMember,
 } from "./varia";
 
 /** Ghost-MP leaderboard: per member, the share of NON-procedural ballots they were absent for.
@@ -162,8 +163,7 @@ export const getNoUniversityMembers = unstable_cache(async (): Promise<PeopleMem
 }, ["varia-no-university-members"], { revalidate: 86400 });
 
 export const getChildren = unstable_cache(async (): Promise<ChildRow[]> => {
-  // All active members: those with a stated children count first (most first), then members whose
-  // profile states no number (children = null -> shown as 0, listed last, name-ordered).
+  // All active members: known counts first (most first), then unknown (null, listed last).
   const { rows } = await pool.query(`
     SELECT m.full_name AS "fullName", m.slug, mcp.party_short_name AS "partyShortName",
            m.photo_thumb_path AS "photoThumbPath", mp.children_count AS children
@@ -172,7 +172,7 @@ export const getChildren = unstable_cache(async (): Promise<ChildRow[]> => {
     LEFT JOIN member_current_party mcp ON mcp.member_id = m.id
     WHERE m.active
     ORDER BY mp.children_count DESC NULLS LAST, m.full_name`);
-  return rows as ChildRow[];
+  return applyChildrenOverrides(rows as ChildRow[]);
 }, ["varia-children"], { revalidate: 86400 });
 
 export const getBirthPins = unstable_cache(async (): Promise<BirthPin[]> => {

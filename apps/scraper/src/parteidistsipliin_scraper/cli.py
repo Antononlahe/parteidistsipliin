@@ -492,10 +492,12 @@ async def _fetch_profiles(cache: ProfileCache, uuids: list[str], refresh: bool) 
 
 
 def _write_profiles(conn, cache: ProfileCache, uuids: list[str]) -> int:
+    from parteidistsipliin_scraper.children_overrides import load_children_overrides
     from parteidistsipliin_scraper.profile_tags import higher_ed_institutions, load_tag_map
     from parteidistsipliin_scraper.towns import coords_for
 
     tag_map = load_tag_map()
+    children_overrides = load_children_overrides()
     hobby_map = tag_map.get("hobby", {})
     prof_map = tag_map.get("profession", {})
     misses: list[str] = []
@@ -508,6 +510,8 @@ def _write_profiles(conn, cache: ProfileCache, uuids: list[str]) -> int:
         if mid is None:
             continue
         p = parse_profile(html)
+        if uuid in children_overrides:
+            p.children_count = children_overrides[uuid]
         coords = coords_for(p.birthplace_town)
         if p.birthplace_town and coords is None:
             misses.append(p.birthplace_town)

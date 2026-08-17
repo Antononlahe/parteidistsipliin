@@ -3,6 +3,7 @@ from pathlib import Path
 
 import pytest
 
+from parteidistsipliin_scraper.children_overrides import load_children_overrides
 from parteidistsipliin_scraper.profile_parse import _children_from, parse_profile
 
 FIX = Path(__file__).resolve().parents[1] / "fixtures" / "profiles"
@@ -46,6 +47,16 @@ def test_children_count_edge_phrasings():
     # No children signal.
     assert _children_from("Abielus") is None
     assert _children_from("Vallaline") is None
+
+
+def test_children_overrides_cover_stale_or_blank_profiles():
+    o = load_children_overrides()
+    assert o["76c477e6-4b49-4d49-ad7b-a4853182a1da"] == 3  # Sikkut
+    assert o["8600af41-4dcc-424d-9d05-7c851e5270b5"] == 3  # Võrklaev
+    assert o["989194b6-b6cc-4c8f-9e6a-8eb8913d103e"] == 2  # Kaljulaid
+    assert o["d557812c-971d-415b-827d-aa6a382ec6ef"] == 1  # Läänemets
+    assert o["d7d9e4d7-699e-4038-83c3-d13369f644c9"] == 1  # Mölder
+    assert o["71bdc9b2-841d-408f-8ace-909e8c11d7d5"] == 3  # Kivi
 
 
 def test_family_status_raw(profiles):

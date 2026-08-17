@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { sortAbsence, generationOf, friendshipCountry, groupPeople, type AbsenceRow, type PeopleRow } from "./varia";
+import { sortAbsence, generationOf, friendshipCountry, groupPeople, applyChildrenOverrides, type AbsenceRow, type PeopleRow, type ChildRow } from "./varia";
 
 const row = (o: Partial<AbsenceRow>): AbsenceRow => ({
   memberId: 1,
@@ -78,5 +78,31 @@ describe("friendshipCountry", () => {
   it("handles an en-dash and falls back gracefully", () => {
     expect(friendshipCountry("Eesti–Ukraina parlamendirühm")).toBe("Ukraina");
     expect(friendshipCountry("Miski muu rühm")).toBe("Miski muu rühm");
+  });
+});
+
+describe("applyChildrenOverrides", () => {
+  const child = (o: Partial<ChildRow>): ChildRow => ({
+    fullName: "X",
+    slug: "x",
+    partyShortName: "RE",
+    photoThumbPath: null,
+    children: null,
+    ...o,
+  });
+
+  it("overlays stale or blank official counts and re-sorts", () => {
+    const rows = applyChildrenOverrides([
+      child({ fullName: "Riina Sikkut", slug: "riina-sikkut", children: null }),
+      child({ fullName: "Mart Võrklaev", slug: "mart-vorklaev", children: 2 }),
+      child({ fullName: "Hanah Lahe", slug: "hanah-lahe", children: null }),
+      child({ fullName: "Aivar Kokk", slug: "aivar-kokk", children: 3 }),
+    ]);
+    expect(rows.map((r) => [r.slug, r.children])).toEqual([
+      ["aivar-kokk", 3],
+      ["mart-vorklaev", 3],
+      ["riina-sikkut", 3],
+      ["hanah-lahe", null],
+    ]);
   });
 });
